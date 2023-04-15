@@ -10,9 +10,10 @@
 #include <util/delay.h>
 
 #define LCD PORTC
-#define RS 0
-#define RW 1
-#define E 2
+#define control_port PORTD
+#define RS 5
+#define RW 6
+#define E 7
 
 #define SET_BIT(REG,BIT) (REG |= (1<<BIT))
 #define RST_BIT(REG,BIT) (REG &= ~(1<<BIT))
@@ -23,13 +24,11 @@ void LCD_init();
 void LCDcmd(unsigned char cmd);
 void LCDdata(unsigned char data);
 void LCDprint(const char *str);
-
+void adc_init();
 int main(void)
 {
     LCD_init();
-	DDRA |= (1 << RW) | (1 << E);
-	PORTA &= ~(1 << RW);
-	PORTA &= ~(1 << E);
+	
 
     LCDprint("hello friends"); 
     while (1){}
@@ -37,19 +36,19 @@ int main(void)
 
 void pulse()
 {
-	PORTA = SET_BIT(PORTA,E);
+	control_port = SET_BIT(control_port,E);
 	_delay_ms(1);
-	PORTA = RST_BIT(PORTA,E);
+	control_port = RST_BIT(control_port,E);
 }
 
 void LCD_init()
 {
 	DDRC = 0xFF;
 	
-	DDRA = SET_BIT(DDRA,RS);
-	DDRA = SET_BIT(DDRA,RW);
-	DDRA = SET_BIT(DDRA,E);
-	PORTA = RST_BIT(PORTA,E);
+	DDRD = SET_BIT(DDRD,RS);
+	DDRD = SET_BIT(DDRD,RW);
+	DDRD = SET_BIT(DDRD,E);
+	control_port = RST_BIT(control_port,E);
 	_delay_ms(15);
 	LCDcmd(0x38);   // 8 BIT Mode 2 lines
 	LCDcmd(0x0E);   // start
@@ -60,8 +59,8 @@ void LCD_init()
 
 void LCDcmd(unsigned char cmd)
 {
-	PORTA = RST_BIT(PORTA,RS);
-	PORTA = RST_BIT(PORTA,RW);
+	control_port = RST_BIT(control_port,RS);
+	control_port = RST_BIT(control_port,RW);
 	LCD = cmd;
 	pulse();
 	_delay_ms(5);
@@ -70,8 +69,8 @@ void LCDcmd(unsigned char cmd)
 
 void LCDdata(unsigned char data)
 {
-	PORTA = SET_BIT(PORTA,RS);
-	PORTA = RST_BIT(PORTA,RW);
+	control_port = SET_BIT(control_port,RS);
+	control_port = RST_BIT(control_port,RW);
 	LCD =  data;
 	pulse();
 	_delay_ms(5);
@@ -85,5 +84,14 @@ void LCDprint(const char *str)
         LCDdata(*str++);
 		_delay_ms(50);
     }
+}
+
+void adc_init(){
+	//choosing the second mode (VCC refrence)
+	ADMUX|=(1<<REFS0);
+
+	ADMUX|=(1<<ADLAR);
+	//ADC enable and prescale it to 8
+	ADCSRA|=(1<<ADEN)|(1<<ADPS1)|(1<<ADPS0)| (1<<ADPS2);
 }
 
