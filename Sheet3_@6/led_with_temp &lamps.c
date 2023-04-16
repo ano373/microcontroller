@@ -100,7 +100,7 @@ void LCD_init()
 	LCDcmd(0x0E);   // start
 	LCDcmd(0x06);	// move cursor to right
 	LCDcmd(0x01);	// clear dis
-	_delay_ms(5);
+	_delay_ms(200);
 }
 
 void LCDcmd(unsigned char cmd)
@@ -119,7 +119,7 @@ void LCDdata(unsigned char data)
 	RST_BIT(control_port,RW);
 	LCD =  data;
 	pulse();
-	_delay_ms(5);
+	_delay_ms(20);
 }
 
 
@@ -128,7 +128,7 @@ void LCDprint(const char *str)
     while (*str)
     {
         LCDdata(*str++);
-		_delay_ms(5);
+		_delay_ms(10);
     }
 }
 
@@ -148,5 +148,4 @@ unsigned int adc_read(unsigned int channel){
 	return ADC;
 
 }
-
 
