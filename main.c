@@ -9,8 +9,8 @@
 #define SET_BIT(REG,BIT) (REG |= (1<<BIT))
 #define RST_BIT(REG,BIT) (REG &= ~(1<<BIT))
 #define GET_BIT(REG,BIT) ((REG & (1<<BIT))>>BIT)
-#define send_upper(REG,BITS) (REG = (BITS & 0xF0))
-#define send_lower(REG,BITS) (REG = BITS<<4)
+#define send_upper(REG,BITS) (REG = (REG & 0x07) | ( (BITS>>1) & 0x78))
+#define send_lower(REG,BITS) (REG = (REG & 0x07) | ( (BITS<<3) & 0x78))
 
 #include <avr/io.h>
 #include <util/delay.h>
